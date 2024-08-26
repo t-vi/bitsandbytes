@@ -30,10 +30,10 @@ jobs:
   build-shared-libs:
     strategy:
       matrix:
-        include:
-          - os: ubuntu-22.04
-            arch: x86_64
-          - os: ubuntu-22.04-arm
+        os: [ubuntu-22.04]
+        arch: [x86_64, aarch64]
+        exclude:
+          - os: windows-latest # This probably requires arm64 Windows agents
             arch: aarch64
           - os: windows-latest
             arch: x86_64
@@ -63,17 +63,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04, ubuntu-22.04-arm, windows-latest]
-        include:
-          - os: ubuntu-22.04
-            arch: x86_64
-          - os: ubuntu-22.04-arm
-            arch: aarch64
-          - os: windows-latest
-            arch: x86_64
+        os: [ubuntu-latest]
+        arch: [x86_64, aarch64]
         cuda_version:
-          ["11.8.0", "12.0.1", "12.1.1", "12.2.2", "12.3.2", "12.4.1", "12.5.1", "12.6.3", "12.8.1", "12.9.1"]
-    runs-on: ${{ matrix.os }}
+          ["12.0.1", "12.1.1", "12.2.2", "12.3.2", "12.4.1", "12.5.0"]
+        exclude:
+          - os: windows-latest # This probably requires arm64 Windows agents
+            arch: aarch64
+          - os: ubuntu-latest # Temporary. Takes too long, not ready yet.
+            arch: aarch64
+    runs-on: ${{ matrix.os }} # One day, we could run them on native agents. Azure supports this now but it's planned only for Q3 2023 for hosted agents
     steps:
       - uses: actions/checkout@v4
         # Windows: We install Cuda on the agent (slow)
@@ -154,16 +153,7 @@ jobs:
       - build-shared-libs-rocm
     strategy:
       matrix:
-        os: [ubuntu-22.04, ubuntu-22.04-arm, windows-latest, macos-latest]
-        include:
-          - os: ubuntu-22.04
-            arch: x86_64
-          - os: ubuntu-22.04-arm
-            arch: aarch64
-          - os: windows-latest
-            arch: x86_64
-          - os: macos-latest
-            arch: arm64
+        os: [ubuntu-latest]
         # The specific Python version is irrelevant in this context as we are only packaging non-C extension
         # code. This ensures compatibility across Python versions, including Python 3.9, as compatibility is
         # dictated by the packaged code itself, not the Python version used for packaging.
@@ -242,13 +232,7 @@ jobs:
           # exclude macos wheels for now
           find tmp/ -type f -name '*.whl' ! -name '*macos*' -print0 | while IFS= read -r -d '' wheel; do
             wheel_filename=$(basename "$wheel")
-
-            # Strip off the original version
-            rest=${wheel_filename#bitsandbytes-*-}
-            new_name="bitsandbytes-${STABLE_PLACEHOLDER_VERSION}-${rest}"
-
-            echo "Renaming $wheel_filename → $new_name"
-            mv "$wheel" "wheels/${new_name}"
+            mv "$wheel" "wheels/"
           done
 
       - name: Inspect wheels directory after renaming files
