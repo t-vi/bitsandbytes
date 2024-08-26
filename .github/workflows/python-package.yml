@@ -30,7 +30,7 @@ jobs:
   build-shared-libs:
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-latest]
         arch: [x86_64, aarch64]
         exclude:
           - os: windows-latest # This probably requires arm64 Windows agents
@@ -60,10 +60,10 @@ jobs:
   build-shared-libs-cuda:
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest]
         arch: [x86_64, aarch64]
         cuda_version:
-          ["11.7.1", "11.8.0", "12.0.1", "12.1.1", "12.2.2", "12.3.2", "12.4.1", "12.5.0"]
+          ["12.0.1", "12.1.1", "12.2.2", "12.3.2", "12.4.1", "12.5.0"]
         exclude:
           - os: windows-latest # This probably requires arm64 Windows agents
             arch: aarch64
@@ -108,7 +108,7 @@ jobs:
       - build-shared-libs-cuda
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-latest]
         # The specific Python version is irrelevant in this context as we are only packaging non-C extension
         # code. This ensures compatibility across Python versions, including Python 3.8, as compatibility is
         # dictated by the packaged code itself, not the Python version used for packaging.
@@ -175,15 +175,15 @@ jobs:
           find tmp/ -type f -name '*.whl' -print0 | while IFS= read -r -d '' wheel; do
             wheel_filename=$(basename "$wheel")
             if [[ $wheel_filename == *linux*x86_64* ]]; then
-              mv "$wheel" wheels/bnb-linux-x86_64.whl
+              mv "$wheel" wheels/ # bnb-linux-x86_64.whl
             elif [[ $wheel_filename == *linux*aarch64* ]]; then
-              mv "$wheel" wheels/bnb-linux-aarch64.whl
+              mv "$wheel" wheels/ # bnb-linux-aarch64.whl
             elif [[ $wheel_filename == *macosx*x86_64* ]]; then
-              mv "$wheel" wheels/bnb-macos-x86_64.whl
+              mv "$wheel" wheels/ # bnb-macos-x86_64.whl
             elif [[ $wheel_filename == *macosx*arm64* ]]; then
-              mv "$wheel" wheels/bnb-macos-arm64.whl
+              mv "$wheel" wheels/ # bnb-macos-arm64.whl
             elif [[ $wheel_filename == *win*amd64* ]]; then
-              mv "$wheel" wheels/bnb-windows-x86_64.whl
+              mv "$wheel" wheels/ # bnb-windows-x86_64.whl
             else
               echo "Unknown wheel format: $wheel_filename"
               exit 1
